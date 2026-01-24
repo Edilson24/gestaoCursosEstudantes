@@ -1,0 +1,52 @@
+<jasperReport name="Anuncio" language="java" columnCount="1" pageWidth="473" pageHeight="842" columnWidth="473" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+
+<parameter name="curso" class="java.lang.String"/>
+	<parameter name="vaga" class="java.lang.Integer"/>
+	<parameter name="valor" class="java.lang.Float"/>
+	<parameter name="dataAbertura" class="java.util.Date"/>
+	<parameter name="dataEncerramento" class="java.util.Date"/>
+    <parameter name="backImage" class="java.io.InputStream"/>
+
+    <query language="sql"><![CDATA[]]></query>
+	<detail>
+		<band height="842" splitType="Stretch">
+            <image scaleImage="FillFrame">
+                <reportElement x="0" y="0" width="479" height="839"/>
+                <imageExpression><![CDATA[$P{backImage}]]></imageExpression>
+            </image>
+            <staticText>
+                <reportElement x="95" y="100" width="281" height="55"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="29" isBold="true"/>
+                </textElement>
+                <text><![CDATA[ANÚNCIO DE VAGA]]></text>
+            </staticText>
+            <rectangle>
+                <reportElement x="31" y="165" width="410" height="2" forecolor="#000000"/>
+            </rectangle>
+            <textField>
+                <reportElement x="20" y="240" width="421" height="271" forecolor="#FFFFFF"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[
+        "OPORTUNIDADE IMPERDÍVEL!\n\n"
+        + "Está aberta uma nova vaga na área de " + $P{curso} + "!\n"
+        + "Procuramos candidatos motivados e prontos para crescer profissionalmente.\n\n"
+        + "Número de vagas disponíveis: " + $P{vaga} + ".\n"
+        + "Valor oferecido: " + $P{valor} + ".\n"
+        + "Período de candidatura: de " + $P{dataAbertura} + " até " + $P{dataEncerramento} + ".\n\n"
+        + "Se você busca uma oportunidade para desenvolver suas competências "
+        + "e fazer parte de um ambiente profissional dinâmico, esta vaga é para você!\n\n"
+        + "Não perca tempo — candidate-se agora!"
+    ]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="321" y="570" width="120" height="30" forecolor="#FFFFFF"/>
+                <textElement verticalAlignment="Middle"/>
+                <text><![CDATA[Autor: Edilson Hilário]]></text>
+            </staticText>
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		</band>
+	</detail>
+</jasperReport>

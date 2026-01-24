@@ -1,0 +1,40 @@
+
+//COM "result.getString("nome_coluna")" é possível encontrar um elemento numa célula, ou seja, consultar diretamente uma coluna.
+
+
+public void login(){
+    String sql = "SELECT * FROM usuario WHERE nome = ? AND senha = ?";
+
+    try(Connection connect = Conexao.obterConexaoDB;
+        PrepareStatemrnt prepare = connect.prepareStatement(sql)){
+
+        prepare.setString(1, nome.getText().trim());
+        prepare.setString(2, senha.getText().trim());
+
+        try(ResultSet result = result.executeQuery()){
+
+        }catch(Exeption e){e.printStrakeTrace}
+
+    }catch(Exeption e){e.printStrakeTrace}
+}
+
+// METODO PARA INSERIR
+public void cadastrar(){
+    String sql = "INSERT INTO usuario (nome, senha, prioridade) VALUES (?, ?, ?)";
+
+    try(Connection connect = Conexao.ObterConexaoDB;
+        PrepareStatement prepare = connect.prepareStatement(sql)){
+
+        //verifique se os campos estao preenchidos usando "Alert"
+
+        prepare.setString(1, nome_da_textfield.)
+
+    }
+}
+
+public ObservableList <>
+
+
+
+
+
