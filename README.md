@@ -1,1 +1,1 @@
-# Gestão de Cursos e Estudantes
+# Gestão de Cursos e Estudantes - Protótipo
