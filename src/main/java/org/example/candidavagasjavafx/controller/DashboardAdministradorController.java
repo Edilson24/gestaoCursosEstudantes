@@ -266,7 +266,12 @@ public class DashboardAdministradorController implements Initializable {
 
             // (opcional) validar vagas
             if (vagasDisponiveis <= 0) {
-                System.out.println("Não há vagas disponíveis!");
+
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("MENSAGEM DE ERRO");
+                alert.setContentText("NÃO HÁ VAGAS DISPONÍVEIS");
+                alert.setHeaderText(null);
+
                 return;
             }
 
@@ -283,7 +288,7 @@ public class DashboardAdministradorController implements Initializable {
             e.printStackTrace();
         }
 
-        System.out.println(MaisCurso);
+        //System.out.println(MaisCurso);
         limparCamposInscricao();
     }
 
@@ -609,41 +614,48 @@ public class DashboardAdministradorController implements Initializable {
 
     public void eliminarVaga(){
 
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("MENSAGEM DE AVISO");
-        alert.setHeaderText(null);
-        alert.setContentText("TEM CERTEZA QUE DESEJA ELIMINAR ESTA VAGA?");
+        if (variavelGuardaNumeroVagas > 0){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("MENSAGEM DE ERRO");
+            alert.setHeaderText(null);
+            alert.setContentText("CURSO NAO PODE SER ELIMINADO. EXISTEM CANDIDATOS INSCRITOS");
+        }else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("MENSAGEM DE AVISO");
+            alert.setHeaderText(null);
+            alert.setContentText("TEM CERTEZA QUE DESEJA ELIMINAR ESTA VAGA?");
 
-        Optional<ButtonType> optional = alert.showAndWait();
+            Optional<ButtonType> optional = alert.showAndWait();
 
-        if (optional.get().equals(ButtonType.OK)){
-            String sql = "DELETE FROM vagas WHERE idvagas = ?";
+            if (optional.get().equals(ButtonType.OK)){
+                String sql = "DELETE FROM vagas WHERE idvagas = ?";
 
-            try (Connection connect = Conexao.obterConexao();
-                 PreparedStatement prepare = connect.prepareStatement(sql)){
+                try (Connection connect = Conexao.obterConexao();
+                     PreparedStatement prepare = connect.prepareStatement(sql)){
 
-                if (variavelGuardaIdVagas == 0){
+                    if (variavelGuardaIdVagas == 0){
 
-                    alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("MENSAGEM DE ERRO");
-                    alert.setHeaderText(null);
-                    alert.setContentText("PRIMEIRO SELECIONE UM ITEM NA TABELA");
-                    alert.showAndWait();
+                        alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("MENSAGEM DE ERRO");
+                        alert.setHeaderText(null);
+                        alert.setContentText("PRIMEIRO SELECIONE UM ITEM NA TABELA");
+                        alert.showAndWait();
 
-                }else {
+                    }else {
 
-                    prepare.setInt(1, variavelGuardaIdVagas);
-                    prepare.executeUpdate();
+                        prepare.setInt(1, variavelGuardaIdVagas);
+                        prepare.executeUpdate();
 
-                    alert = new Alert(Alert.AlertType.CONFIRMATION);
-                    alert.setTitle("MENSAGEM DE CONFIRMACAO");
-                    alert.setHeaderText(null);
-                    alert.setContentText("VAGA ELIMINADA COM SUCESSO");
-                    alert.showAndWait();
-                }
-            } catch (Exception e) {e.printStackTrace();}
+                        alert = new Alert(Alert.AlertType.CONFIRMATION);
+                        alert.setTitle("MENSAGEM DE CONFIRMACAO");
+                        alert.setHeaderText(null);
+                        alert.setContentText("VAGA ELIMINADA COM SUCESSO");
+                        alert.showAndWait();
+                    }
+                } catch (Exception e) {e.printStackTrace();}
+            }
+            mostrarListaVagas();
         }
-        mostrarListaVagas();
     }
 
     public void displayUsuario(){
@@ -730,6 +742,7 @@ public class DashboardAdministradorController implements Initializable {
     }
 
     private int variavelGuardaIdVagas = 0;
+    private int variavelGuardaNumeroVagas = 0;
     public void selecionarVaga(){
         Vaga vaga = vagas_tableView.getSelectionModel().getSelectedItem();
         int num = vagas_tableView.getSelectionModel().getSelectedIndex();
@@ -738,6 +751,7 @@ public class DashboardAdministradorController implements Initializable {
             return;
         }
         variavelGuardaIdVagas = vaga.getIdVaga();
+        variavelGuardaNumeroVagas = vaga.getVagas();
         //System.out.println(variavelGuardaIdVagas);
 
         vagas_vaga.setText(String.valueOf(vaga.getVagas()));
