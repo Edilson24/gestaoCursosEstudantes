@@ -104,7 +104,7 @@
                <center>
                   <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                      <children>
-                        <AnchorPane fx:id="home_form" layoutX="7.0" layoutY="6.0" prefHeight="649.0" prefWidth="1084.0" stylesheets="@../css/DashboardStyle.css" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane fx:id="home_form" layoutX="7.0" layoutY="6.0" prefHeight="649.0" prefWidth="1084.0" stylesheets="@../css/DashboardStyle.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <AnchorPane layoutX="352.0" layoutY="325.0" prefHeight="363.0" prefWidth="390.0" stylesheets="@../css/DashboardStyle.css" AnchorPane.bottomAnchor="9.0" AnchorPane.leftAnchor="352.0" AnchorPane.rightAnchor="340.0">
                                  <styleClass>
@@ -326,7 +326,7 @@
                                  </children>
                               </AnchorPane>
                            </children></AnchorPane>
-                        <AnchorPane fx:id="inscricao_form" layoutX="4.0" layoutY="3.0" prefHeight="643.0" prefWidth="1076.0">
+                        <AnchorPane fx:id="inscricao_form" layoutX="4.0" layoutY="3.0" prefHeight="643.0" prefWidth="1076.0" visible="false">
                            <children>
                               <AnchorPane prefHeight="642.0" prefWidth="327.0" stylesheets="@../css/DashboardStyle.css" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="2.0">
                                  <styleClass>

@@ -169,6 +169,475 @@ public class DashboardAdministradorController implements Initializable {
     @FXML
     private Circle imagemPerfil;
 
+    /*-------------------------------------------
+    * METODOS RESPONSAVEIS PELA DASHBOARD - HOME
+    * -------------------------------------------*/
+
+    public void homeGraficoVagas(){
+        home_graficoVagas.getData().clear();
+
+        String sql = "SELECT data, COUNT(idvagas) FROM vagas GROUP BY data ORDER BY TIMESTAMP(data) ASC LIMIT 7";
+
+
+        try (Connection connect = Conexao.obterConexao();
+             PreparedStatement prepare = connect.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery())
+        {
+
+            XYChart.Series grafico = new XYChart.Series();
+
+            while (result.next()){
+                grafico.getData().add(new XYChart.Data(result.getString(1), result.getInt(2)));
+            }
+
+            home_graficoVagas.getData().add(grafico);
+
+        } catch (Exception e) {e.printStackTrace();}
+    }
+
+    public void homeGrafico(){
+        home_graficoCandidato.getData().clear();
+
+        String sql = "SELECT data, COUNT(idcandidato) FROM candidatos GROUP BY data ORDER BY TIMESTAMP(data) ASC LIMIT 7";
+
+        try (Connection connect = Conexao.obterConexao();
+             PreparedStatement prepare = connect.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery();)
+        {
+            XYChart.Series grafico = new XYChart.Series();
+
+            while (result.next()){
+                grafico.getData().add(new XYChart.Data(result.getString(1), result.getInt(2)));
+            }
+
+            home_graficoCandidato.getData().add(grafico);
+
+        } catch (Exception e) {e.printStackTrace();}
+    }
+
+    public void somaCursos(){
+        String sql = "SELECT COUNT(idvagas) FROM vagas";
+
+        int contagemDados = 0;
+
+        try (Connection connect = Conexao.obterConexao();
+             PreparedStatement prepare = connect.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery();) {
+
+            while (result.next()){
+                contagemDados = result.getInt("COUNT(idvagas)");
+            }
+            home_totalCursos.setText(String.valueOf(contagemDados));
+        } catch (Exception e) {e.printStackTrace();}
+
+    }
+
+    public void somaVagas(){
+        String sql = "SELECT vagas FROM vagas";
+
+        try (Connection connct = Conexao.obterConexao();
+             PreparedStatement prepare = connct.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery()) {
+
+            int acomulador = 0;
+            while (result.next()){
+                int repetidor = result.getInt("vagas");
+                acomulador += repetidor;
+            }
+
+            home_totalVagas.setText(String.valueOf(acomulador));
+            System.out.println();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void somaPagametos(){
+        String sql = "SELECT pagamento FROM candidatos";
+
+        try (Connection connct = Conexao.obterConexao();
+             PreparedStatement prepare = connct.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery()) {
+
+            float acomulador = 0;
+            while (result.next()){
+                float repetidor = result.getInt("pagamento");
+                acomulador += repetidor;
+            }
+
+            home_totalPagamento.setText(String.valueOf(acomulador));
+            System.out.println();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void somaCandidatos(){
+        String sql = "SELECT * FROM candidatos";
+
+        try (Connection connct = Conexao.obterConexao();
+             PreparedStatement prepare = connct.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery()) {
+
+            int acomulador = 0;
+            while (result.next()){
+                String repetidor = result.getString("nome");
+                acomulador += 1;
+            }
+
+            home_totalCandidatos.setText(String.valueOf(acomulador));
+            System.out.println();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*-------------------------------------------
+     * METODOS RESPONSAVEIS PELAS VAGAS - HOME
+     * -------------------------------------------*/
+
+    public void novaVaga(){
+        /*
+         * 1 - Na Inserção de nova vaga, o DatePicker que captura a data de abertura tem que ter as datas anteriores a data atual desabilitadas.
+         * Não pode ser cadastrada uma data e ter a possibilidade de colocar "ontem" como data de abertura.
+         *
+         * 2 - Na insertion da data de encerramento da vaga, devem estar desabilitadas as datas que antecedem a data de abertura
+         * */
+
+        String sql = "INSERT INTO vagas (area, vagas, inscritos,  abertura, encerramento, valor, data) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection connect = Conexao.obterConexao();
+             PreparedStatement prepare = connect.prepareStatement(sql)
+        ){
+
+            Alert alert;
+
+            if (vagas_area.getText().isEmpty()
+                    || vagas_vaga.getText().isEmpty()
+                    || vagas_valor.getText().isEmpty()
+                    || vagas_dataAbertura.getValue() == null
+                    || vagas_dataEncerramento.getValue() == null
+            ){
+                alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("MENSAGEM DE ERRO");
+                alert.setContentText("PREENCHA OS CAMPOS EM BRANCO");
+                alert.setHeaderText(null);
+                alert.showAndWait();
+            }else {
+
+                prepare.setString(1, vagas_area.getText().trim());
+                prepare.setString(2, vagas_vaga.getText().trim());
+                prepare.setInt(3, 0);
+                prepare.setString(4, String.valueOf(vagas_dataAbertura.getValue()));
+                prepare.setString(5, String.valueOf(vagas_dataEncerramento.getValue()));
+                prepare.setString(6, vagas_valor.getText().trim());
+
+                Date date = new Date();
+                java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+                prepare.setString(7, String.valueOf(sqlDate));
+
+                int linha = prepare.executeUpdate();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ListaVagasDisponiveis();
+        mostrarListaVagas();
+        limparCampos();
+    }
+
+    public void eliminarVaga(){
+
+        if (variavelGuardaNumeroVagas > 0){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("MENSAGEM DE ERRO");
+            alert.setHeaderText(null);
+            alert.setContentText("CURSO NAO PODE SER ELIMINADO. EXISTEM CANDIDATOS INSCRITOS");
+        }else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("MENSAGEM DE AVISO");
+            alert.setHeaderText(null);
+            alert.setContentText("TEM CERTEZA QUE DESEJA ELIMINAR ESTA VAGA?");
+
+            Optional<ButtonType> optional = alert.showAndWait();
+
+            if (optional.get().equals(ButtonType.OK)){
+                String sql = "DELETE FROM vagas WHERE idvagas = ?";
+
+                try (Connection connect = Conexao.obterConexao();
+                     PreparedStatement prepare = connect.prepareStatement(sql)){
+
+                    if (variavelGuardaIdVagas == 0){
+
+                        alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("MENSAGEM DE ERRO");
+                        alert.setHeaderText(null);
+                        alert.setContentText("PRIMEIRO SELECIONE UM ITEM NA TABELA");
+                        alert.showAndWait();
+
+                    }else {
+
+                        prepare.setInt(1, variavelGuardaIdVagas);
+                        prepare.executeUpdate();
+
+                        alert = new Alert(Alert.AlertType.CONFIRMATION);
+                        alert.setTitle("MENSAGEM DE CONFIRMACAO");
+                        alert.setHeaderText(null);
+                        alert.setContentText("VAGA ELIMINADA COM SUCESSO");
+                        alert.showAndWait();
+                    }
+                } catch (Exception e) {e.printStackTrace();}
+            }
+            mostrarListaVagas();
+        }
+    }
+
+    public void atualizarVagas(){
+
+        System.out.println();
+        String sql = """
+        UPDATE vagas
+        SET area = ?,
+            vagas = ?,
+            abertura = ?,
+            encerramento = ?,
+            valor = ?
+        WHERE idvagas = ?
+    """;
+
+        Alert alert;
+
+        try (Connection connect = Conexao.obterConexao();
+             PreparedStatement prepare = connect.prepareStatement(sql)) {
+
+            prepare.setString(1, vagas_area.getText());
+            prepare.setString(2, vagas_vaga.getText());
+            prepare.setDate(3, java.sql.Date.valueOf(vagas_dataAbertura.getValue()));
+            prepare.setDate(4, java.sql.Date.valueOf(vagas_dataEncerramento.getValue()));
+            prepare.setBigDecimal(5, new BigDecimal(vagas_valor.getText()));
+            prepare.setInt(6, variavelGuardaIdVagas);
+
+            int linhas = prepare.executeUpdate();
+
+            if (linhas > 0) {
+
+                alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("MENSAGEM DE CONFIRMACAO");
+                alert.setContentText("DADOS ATUALIZADOS COM SUCESSO");
+                alert.setHeaderText(null);
+                alert.showAndWait();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        mostrarListaVagas();
+        limparCampos();
+    }
+
+    public void configurarListViewCurso(){
+        inscricaoList.setCellFactory(list -> new ListCell<>() {
+
+            @Override
+            protected void updateItem(Vaga vaga, boolean empty) {
+                super.updateItem(vaga, empty);
+
+                if (empty || vaga == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+
+                    Label lblArea = new Label(vaga.getArea());
+                    lblArea.getStyleClass().add("vaga-area");
+
+                    Label lblVagas = new Label("Vagas        : " + vaga.getVagas());
+                    Label lblInscritos = new Label("Inscritoos  : " + vaga.getInscritos());
+                    Label lblValor = new Label("Valor          : " + vaga.getValor());
+
+                    VBox box = new VBox(lblArea, lblVagas, lblInscritos, lblValor);
+                    box.getStyleClass().add("vaga-card");
+                    box.setSpacing(2);
+
+                    box.setOpacity(0);
+                    box.setTranslateY(10);
+
+                    FadeTransition fade = new FadeTransition(Duration.millis(250), box);
+                    fade.setFromValue(0);
+                    fade.setToValue(1);
+
+                    TranslateTransition slide = new TranslateTransition(Duration.millis(270), box);
+                    slide.setFromY(10);
+                    slide.setToY(0);
+
+                    new ParallelTransition(fade, slide).play();
+
+                    setGraphic(box);
+                    inscricaoList.setFixedCellSize(130);
+                }
+            }
+        });
+    }
+
+    public void configurarListView() {
+
+        home_vagasList.setCellFactory(list -> new ListCell<>() {
+
+            @Override
+            protected void updateItem(Vaga vaga, boolean empty) {
+                super.updateItem(vaga, empty);
+
+                if (empty || vaga == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+
+                    Label lblArea = new Label(vaga.getArea());
+                    lblArea.getStyleClass().add("vaga-area");
+
+                    Label lblVagas = new Label("Vagas: " + vaga.getVagas());
+                    Label lblValor = new Label("Valor: " + vaga.getValor());
+
+                    VBox box = new VBox(lblArea, lblVagas, lblValor);
+                    box.getStyleClass().add("vaga-card");
+                    box.setSpacing(6);
+
+                    box.setOpacity(0);
+                    box.setTranslateY(10);
+
+                    FadeTransition fade = new FadeTransition(Duration.millis(250), box);
+                    fade.setFromValue(0);
+                    fade.setToValue(1);
+
+                    TranslateTransition slide = new TranslateTransition(Duration.millis(270), box);
+                    slide.setFromY(10);
+                    slide.setToY(0);
+
+                    new ParallelTransition(fade, slide).play();
+
+                    setGraphic(box);
+                    home_vagasList.setFixedCellSize(120);
+
+                }
+            }
+        });
+    }
+
+    private int variavelGuardaIdVagas = 0;
+    private int variavelGuardaNumeroVagas = 0;
+    public void selecionarVaga(){
+        Vaga vaga = vagas_tableView.getSelectionModel().getSelectedItem();
+        int num = vagas_tableView.getSelectionModel().getSelectedIndex();
+
+        if (num - 1 < - 1){
+            return;
+        }
+        variavelGuardaIdVagas = vaga.getIdVaga();
+        variavelGuardaNumeroVagas = vaga.getVagas();
+        //System.out.println(variavelGuardaIdVagas);
+
+        vagas_vaga.setText(String.valueOf(vaga.getVagas()));
+        vagas_area.setText(String.valueOf(vaga.getArea()));
+        vagas_valor.setText(String.valueOf(vaga.getValor()));
+
+        vagas_dataAbertura.setValue(vaga.getDataAbertura().toLocalDate());
+        vagas_dataEncerramento.setValue(vaga.getDataEncerramento().toLocalDate());
+    }
+
+    public ObservableList <Vaga> ListaVagasDisponiveis(){
+        ObservableList <Vaga> listaVagas = FXCollections.observableArrayList();
+
+        String sql = "SELECT * FROM vagas";
+
+        try (Connection connect = Conexao.obterConexao();
+             PreparedStatement prepare = connect.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery()
+        ){
+            Vaga vaga;
+
+            while (result.next()){
+                vaga = new Vaga(
+                        result.getInt("idvagas"),
+                        result.getString("area"),
+                        result.getInt("vagas"),
+                        result.getInt("inscritos"),
+                        result.getDate("abertura"),
+                        result.getDate("encerramento"),
+                        result.getDouble("valor"),
+                        result.getDate("data"));
+                listaVagas.add(vaga);
+            }
+        } catch (Exception e) {e.printStackTrace();}
+        return listaVagas;
+    }
+
+    private ObservableList <Vaga> ListaVagas;
+    public void mostrarListaVagas(){
+        ListaVagas = ListaVagasDisponiveis();
+
+        vagas_col_area.setCellValueFactory(new PropertyValueFactory<>("area"));
+        vagas_col_vagas.setCellValueFactory(new PropertyValueFactory<>("vagas"));
+        vagas_col_abertura.setCellValueFactory(new PropertyValueFactory<>("dataAbertura"));
+        vagas_col_encerramento.setCellValueFactory(new PropertyValueFactory<>("dataEncerramento"));
+        vagas_col_pagamento.setCellValueFactory(new PropertyValueFactory<>("valor"));
+
+        vagas_tableView.setItems(ListaVagas);
+    }
+
+    public void gerarAnuncio(){
+        JasperReportController anuncio = new JasperReportController();
+
+        Vaga vagaSelecionada = vagas_tableView.getSelectionModel().getSelectedItem();
+
+        String sql = "SELECT * FROM vagas WHERE idvagas = ?";
+
+        try(Connection connect = Conexao.obterConexao();
+            PreparedStatement prepare = connect.prepareStatement(sql)
+        ){
+            prepare.setString(1, String.valueOf(variavelGuardaIdVagas));
+
+            try (ResultSet result = prepare.executeQuery()){
+
+                if (result.next()){
+                    String areaVaga;
+                    Date dataAbertura , datafechamento;
+                    float valor;
+                    int vagasN;
+
+                    areaVaga = result.getString("area");
+                    valor = result.getFloat("valor");
+                    dataAbertura = result.getDate("abertura");
+                    datafechamento = result.getDate("encerramento");
+                    vagasN = result.getInt("vagas");
+
+                    anuncio.gerar( areaVaga, vagasN, valor, dataAbertura, datafechamento);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void limparCampos(){
+        vagas_area.setText("");
+        vagas_vaga.setText("");
+        vagas_valor.setText("");
+        vagas_dataAbertura.setValue(null);
+        vagas_dataEncerramento.setValue(null);
+    }
+
+    /*-------------------------------------------
+     * METODOS RESPONSAVEIS PELAS INSCRIÇÕES - CANDIDATO
+     * -------------------------------------------*/
+
     public void acharValorCurso(){
         String sql = "SELECT valor FROM vagas WHERE area = '" + inscricao_curso.getSelectionModel().getSelectedItem() + "'";
 
@@ -193,14 +662,14 @@ public class DashboardAdministradorController implements Initializable {
         String sql = "INSERT INTO candidatos (nome, idade, vaga, pagamento, data) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection connect = Conexao.obterConexao();
-        PreparedStatement prepare = connect.prepareStatement(sql)){
+             PreparedStatement prepare = connect.prepareStatement(sql)){
 
             Alert alert;
 
             if (inscrica_nome.getText().isEmpty()
-            ||  inscricao_idade.getText().isEmpty()
-            ||  inscricao_labelValor.getText() == "0"
-            ||  inscricao_curso.getSelectionModel() == null
+                    ||  inscricao_idade.getText().isEmpty()
+                    ||  inscricao_labelValor.getText() == "0"
+                    ||  inscricao_curso.getSelectionModel() == null
 
             ){
                 alert = new Alert(Alert.AlertType.ERROR);
@@ -299,7 +768,6 @@ public class DashboardAdministradorController implements Initializable {
         inscricao_labelValor.setText("0");
     }
 
-
     public void eliminarCandidato(){
 
         Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -386,8 +854,8 @@ public class DashboardAdministradorController implements Initializable {
         String sql = "SELECT * FROM vagas WHERE vagas > inscritos";
 
         try (Connection connect = Conexao.obterConexao();
-        PreparedStatement prepare = connect.prepareStatement(sql);
-        ResultSet resul = prepare.executeQuery()){
+             PreparedStatement prepare = connect.prepareStatement(sql);
+             ResultSet resul = prepare.executeQuery()){
 
             ObservableList listaCurso = FXCollections.observableArrayList();
 
@@ -399,262 +867,6 @@ public class DashboardAdministradorController implements Initializable {
 
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    public void homeGraficoVagas(){
-        home_graficoVagas.getData().clear();
-
-        String sql = "SELECT data, COUNT(idvagas) FROM vagas GROUP BY data ORDER BY TIMESTAMP(data) ASC LIMIT 7";
-
-
-        try (Connection connect = Conexao.obterConexao();
-            PreparedStatement prepare = connect.prepareStatement(sql);
-            ResultSet result = prepare.executeQuery())
-        {
-
-            XYChart.Series grafico = new XYChart.Series();
-
-            while (result.next()){
-                grafico.getData().add(new XYChart.Data(result.getString(1), result.getInt(2)));
-            }
-
-            home_graficoVagas.getData().add(grafico);
-
-        } catch (Exception e) {e.printStackTrace();}
-    }
-
-    public void homeGrafico(){
-        home_graficoCandidato.getData().clear();
-
-        String sql = "SELECT data, COUNT(idcandidato) FROM candidatos GROUP BY data ORDER BY TIMESTAMP(data) ASC LIMIT 7";
-
-        try (Connection connect = Conexao.obterConexao();
-             PreparedStatement prepare = connect.prepareStatement(sql);
-             ResultSet result = prepare.executeQuery();)
-        {
-            XYChart.Series grafico = new XYChart.Series();
-
-            while (result.next()){
-                grafico.getData().add(new XYChart.Data(result.getString(1), result.getInt(2)));
-            }
-
-            home_graficoCandidato.getData().add(grafico);
-
-        } catch (Exception e) {e.printStackTrace();}
-    }
-
-    public void somaCursos(){
-        String sql = "SELECT COUNT(idvagas) FROM vagas";
-
-        int contagemDados = 0;
-
-        try (Connection connect = Conexao.obterConexao();
-             PreparedStatement prepare = connect.prepareStatement(sql);
-             ResultSet result = prepare.executeQuery();) {
-
-            while (result.next()){
-                contagemDados = result.getInt("COUNT(idvagas)");
-            }
-            home_totalCursos.setText(String.valueOf(contagemDados));
-        } catch (Exception e) {e.printStackTrace();}
-
-    }
-
-    public void somaVagas(){
-        String sql = "SELECT vagas FROM vagas";
-
-        try (Connection connct = Conexao.obterConexao();
-        PreparedStatement prepare = connct.prepareStatement(sql);
-        ResultSet result = prepare.executeQuery()) {
-
-            int acomulador = 0;
-            while (result.next()){
-                int repetidor = result.getInt("vagas");
-                acomulador += repetidor;
-            }
-
-            home_totalVagas.setText(String.valueOf(acomulador));
-            System.out.println();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void somaPagametos(){
-        String sql = "SELECT pagamento FROM candidatos";
-
-        try (Connection connct = Conexao.obterConexao();
-             PreparedStatement prepare = connct.prepareStatement(sql);
-             ResultSet result = prepare.executeQuery()) {
-
-            float acomulador = 0;
-            while (result.next()){
-                float repetidor = result.getInt("pagamento");
-                acomulador += repetidor;
-            }
-
-            home_totalPagamento.setText(String.valueOf(acomulador));
-            System.out.println();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public void somaCandidatos(){
-        String sql = "SELECT * FROM candidatos";
-
-        try (Connection connct = Conexao.obterConexao();
-             PreparedStatement prepare = connct.prepareStatement(sql);
-             ResultSet result = prepare.executeQuery()) {
-
-            int acomulador = 0;
-            while (result.next()){
-                String repetidor = result.getString("nome");
-                acomulador += 1;
-            }
-
-            home_totalCandidatos.setText(String.valueOf(acomulador));
-            System.out.println();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void configurarListViewCurso(){
-        inscricaoList.setCellFactory(list -> new ListCell<>() {
-
-            @Override
-            protected void updateItem(Vaga vaga, boolean empty) {
-                super.updateItem(vaga, empty);
-
-                if (empty || vaga == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-
-                    Label lblArea = new Label(vaga.getArea());
-                    lblArea.getStyleClass().add("vaga-area");
-
-                    Label lblVagas = new Label("Vagas        : " + vaga.getVagas());
-                    Label lblInscritos = new Label("Inscritoos  : " + vaga.getInscritos());
-                    Label lblValor = new Label("Valor          : " + vaga.getValor());
-
-                    VBox box = new VBox(lblArea, lblVagas, lblInscritos, lblValor);
-                    box.getStyleClass().add("vaga-card");
-                    box.setSpacing(2);
-
-                    box.setOpacity(0);
-                    box.setTranslateY(10);
-
-                    FadeTransition fade = new FadeTransition(Duration.millis(250), box);
-                    fade.setFromValue(0);
-                    fade.setToValue(1);
-
-                    TranslateTransition slide = new TranslateTransition(Duration.millis(270), box);
-                    slide.setFromY(10);
-                    slide.setToY(0);
-
-                    new ParallelTransition(fade, slide).play();
-
-                    setGraphic(box);
-                    inscricaoList.setFixedCellSize(130);
-                }
-            }
-        });
-    }
-
-    public void configurarListView() {
-
-        home_vagasList.setCellFactory(list -> new ListCell<>() {
-
-            @Override
-            protected void updateItem(Vaga vaga, boolean empty) {
-                super.updateItem(vaga, empty);
-
-                if (empty || vaga == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-
-                    Label lblArea = new Label(vaga.getArea());
-                    lblArea.getStyleClass().add("vaga-area");
-
-                    Label lblVagas = new Label("Vagas: " + vaga.getVagas());
-                    Label lblValor = new Label("Valor: " + vaga.getValor());
-
-                    VBox box = new VBox(lblArea, lblVagas, lblValor);
-                    box.getStyleClass().add("vaga-card");
-                    box.setSpacing(6);
-
-                    box.setOpacity(0);
-                    box.setTranslateY(10);
-
-                    FadeTransition fade = new FadeTransition(Duration.millis(250), box);
-                    fade.setFromValue(0);
-                    fade.setToValue(1);
-
-                    TranslateTransition slide = new TranslateTransition(Duration.millis(270), box);
-                    slide.setFromY(10);
-                    slide.setToY(0);
-
-                    new ParallelTransition(fade, slide).play();
-
-                    setGraphic(box);
-                    home_vagasList.setFixedCellSize(120);
-
-                }
-            }
-        });
-    }
-
-    public void eliminarVaga(){
-
-        if (variavelGuardaNumeroVagas > 0){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("MENSAGEM DE ERRO");
-            alert.setHeaderText(null);
-            alert.setContentText("CURSO NAO PODE SER ELIMINADO. EXISTEM CANDIDATOS INSCRITOS");
-        }else {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("MENSAGEM DE AVISO");
-            alert.setHeaderText(null);
-            alert.setContentText("TEM CERTEZA QUE DESEJA ELIMINAR ESTA VAGA?");
-
-            Optional<ButtonType> optional = alert.showAndWait();
-
-            if (optional.get().equals(ButtonType.OK)){
-                String sql = "DELETE FROM vagas WHERE idvagas = ?";
-
-                try (Connection connect = Conexao.obterConexao();
-                     PreparedStatement prepare = connect.prepareStatement(sql)){
-
-                    if (variavelGuardaIdVagas == 0){
-
-                        alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setTitle("MENSAGEM DE ERRO");
-                        alert.setHeaderText(null);
-                        alert.setContentText("PRIMEIRO SELECIONE UM ITEM NA TABELA");
-                        alert.showAndWait();
-
-                    }else {
-
-                        prepare.setInt(1, variavelGuardaIdVagas);
-                        prepare.executeUpdate();
-
-                        alert = new Alert(Alert.AlertType.CONFIRMATION);
-                        alert.setTitle("MENSAGEM DE CONFIRMACAO");
-                        alert.setHeaderText(null);
-                        alert.setContentText("VAGA ELIMINADA COM SUCESSO");
-                        alert.showAndWait();
-                    }
-                } catch (Exception e) {e.printStackTrace();}
-            }
-            mostrarListaVagas();
         }
     }
 
@@ -697,71 +909,6 @@ public class DashboardAdministradorController implements Initializable {
         }
     }
 
-    public void atualizarVagas(){
-
-        System.out.println();
-        String sql = """
-        UPDATE vagas
-        SET area = ?,
-            vagas = ?,
-            abertura = ?,
-            encerramento = ?,
-            valor = ?
-        WHERE idvagas = ?
-    """;
-
-        Alert alert;
-
-        try (Connection connect = Conexao.obterConexao();
-             PreparedStatement prepare = connect.prepareStatement(sql)) {
-
-            prepare.setString(1, vagas_area.getText());
-            prepare.setString(2, vagas_vaga.getText());
-            prepare.setDate(3, java.sql.Date.valueOf(vagas_dataAbertura.getValue()));
-            prepare.setDate(4, java.sql.Date.valueOf(vagas_dataEncerramento.getValue()));
-            prepare.setBigDecimal(5, new BigDecimal(vagas_valor.getText()));
-            prepare.setInt(6, variavelGuardaIdVagas);
-
-            int linhas = prepare.executeUpdate();
-
-            if (linhas > 0) {
-
-                alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("MENSAGEM DE CONFIRMACAO");
-                alert.setContentText("DADOS ATUALIZADOS COM SUCESSO");
-                alert.setHeaderText(null);
-                alert.showAndWait();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        mostrarListaVagas();
-        limparCampos();
-    }
-
-    private int variavelGuardaIdVagas = 0;
-    private int variavelGuardaNumeroVagas = 0;
-    public void selecionarVaga(){
-        Vaga vaga = vagas_tableView.getSelectionModel().getSelectedItem();
-        int num = vagas_tableView.getSelectionModel().getSelectedIndex();
-
-        if (num - 1 < - 1){
-            return;
-        }
-        variavelGuardaIdVagas = vaga.getIdVaga();
-        variavelGuardaNumeroVagas = vaga.getVagas();
-        //System.out.println(variavelGuardaIdVagas);
-
-        vagas_vaga.setText(String.valueOf(vaga.getVagas()));
-        vagas_area.setText(String.valueOf(vaga.getArea()));
-        vagas_valor.setText(String.valueOf(vaga.getValor()));
-
-        vagas_dataAbertura.setValue(vaga.getDataAbertura().toLocalDate());
-        vagas_dataEncerramento.setValue(vaga.getDataEncerramento().toLocalDate());
-    }
-
     int variavelGuardaIdCandidatos = 0;
     public void selecionarCandidatoListView() {
         BuscaListaCandidatos();
@@ -781,94 +928,6 @@ public class DashboardAdministradorController implements Initializable {
         });
     }
 
-
-
-    public void gerarAnuncio(){
-        JasperReportController anuncio = new JasperReportController();
-
-        Vaga vagaSelecionada = vagas_tableView.getSelectionModel().getSelectedItem();
-
-        String sql = "SELECT * FROM vagas WHERE idvagas = ?";
-
-        try(Connection connect = Conexao.obterConexao();
-            PreparedStatement prepare = connect.prepareStatement(sql)
-        ){
-            prepare.setString(1, String.valueOf(variavelGuardaIdVagas));
-
-            try (ResultSet result = prepare.executeQuery()){
-
-                if (result.next()){
-                    String areaVaga;
-                    Date dataAbertura , datafechamento;
-                    float valor;
-                    int vagasN;
-
-                    areaVaga = result.getString("area");
-                    valor = result.getFloat("valor");
-                    dataAbertura = result.getDate("abertura");
-                    datafechamento = result.getDate("encerramento");
-                    vagasN = result.getInt("vagas");
-
-                    anuncio.gerar( areaVaga, vagasN, valor, dataAbertura, datafechamento);
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void limparCampos(){
-        vagas_area.setText("");
-        vagas_vaga.setText("");
-        vagas_valor.setText("");
-        vagas_dataAbertura.setValue(null);
-        vagas_dataEncerramento.setValue(null);
-    }
-
-    public ObservableList <Vaga> ListaVagasDisponiveis(){
-        ObservableList <Vaga> listaVagas = FXCollections.observableArrayList();
-
-        String sql = "SELECT * FROM vagas";
-
-        try (Connection connect = Conexao.obterConexao();
-            PreparedStatement prepare = connect.prepareStatement(sql);
-            ResultSet result = prepare.executeQuery()
-        ){
-            Vaga vaga;
-
-            while (result.next()){
-                vaga = new Vaga(
-                        result.getInt("idvagas"),
-                        result.getString("area"),
-                        result.getInt("vagas"),
-                        result.getInt("inscritos"),
-                        result.getDate("abertura"),
-                        result.getDate("encerramento"),
-                        result.getDouble("valor"),
-                        result.getDate("data"));
-                listaVagas.add(vaga);
-            }
-        } catch (Exception e) {e.printStackTrace();}
-        return listaVagas;
-    }
-
-    private ObservableList <Vaga> ListaVagas;
-    public void mostrarListaVagas(){
-        ListaVagas = ListaVagasDisponiveis();
-
-        vagas_col_area.setCellValueFactory(new PropertyValueFactory<>("area"));
-        vagas_col_vagas.setCellValueFactory(new PropertyValueFactory<>("vagas"));
-        vagas_col_abertura.setCellValueFactory(new PropertyValueFactory<>("dataAbertura"));
-        vagas_col_encerramento.setCellValueFactory(new PropertyValueFactory<>("dataEncerramento"));
-        vagas_col_pagamento.setCellValueFactory(new PropertyValueFactory<>("valor"));
-
-        vagas_tableView.setItems(ListaVagas);
-    }
-
-    //AREA DE CANDIDATOS
     public ObservableList <Candidato> BuscaListaCandidatos(){
         ObservableList <Candidato> listaCandidato = FXCollections.observableArrayList();
 
@@ -893,7 +952,6 @@ public class DashboardAdministradorController implements Initializable {
         return listaCandidato;
     }
 
-    //LISTVIEW EM CONSTRUCAO
     public void configurarListViewCandidato(){
         candidato_ListView.setCellFactory(lista -> new ListCell<>() {
 
@@ -944,57 +1002,6 @@ public class DashboardAdministradorController implements Initializable {
         candidato_ListView.setItems(BuscaListaCandidatos());
     }
 
-    public void novaVaga(){
-        /*
-        * 1 - Na Inserção de nova vaga, o DatePicker que captura a data de abertura tem que ter as datas anteriores a data atual desabilitadas.
-        * Não pode ser cadastrada uma data e ter a possibilidade de colocar "ontem" como data de abertura.
-        *
-        * 2 - Na insertion da data de encerramento da vaga, devem estar desabilitadas as datas que antecedem a data de abertura
-        * */
-
-        String sql = "INSERT INTO vagas (area, vagas, inscritos,  abertura, encerramento, valor, data) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-        try (Connection connect = Conexao.obterConexao();
-             PreparedStatement prepare = connect.prepareStatement(sql)
-            ){
-
-            Alert alert;
-
-            if (vagas_area.getText().isEmpty()
-                || vagas_vaga.getText().isEmpty()
-                || vagas_valor.getText().isEmpty()
-                || vagas_dataAbertura.getValue() == null
-                || vagas_dataEncerramento.getValue() == null
-            ){
-                alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("MENSAGEM DE ERRO");
-                alert.setContentText("PREENCHA OS CAMPOS EM BRANCO");
-                alert.setHeaderText(null);
-                alert.showAndWait();
-            }else {
-
-                prepare.setString(1, vagas_area.getText().trim());
-                prepare.setString(2, vagas_vaga.getText().trim());
-                prepare.setInt(3, 0);
-                prepare.setString(4, String.valueOf(vagas_dataAbertura.getValue()));
-                prepare.setString(5, String.valueOf(vagas_dataEncerramento.getValue()));
-                prepare.setString(6, vagas_valor.getText().trim());
-
-                Date date = new Date();
-                java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-                prepare.setString(7, String.valueOf(sqlDate));
-
-                int linha = prepare.executeUpdate();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        ListaVagasDisponiveis();
-        mostrarListaVagas();
-        limparCampos();
-    }
-
     public void mudarTela(ActionEvent event){
         if (event.getSource() == home_btn){
             home_form.setVisible(true);
@@ -1010,7 +1017,7 @@ public class DashboardAdministradorController implements Initializable {
 
             homeGraficoVagas();
             homeGrafico();
-            limparCampos();
+
         }
 
         else if (event.getSource() == vagas_btn){
