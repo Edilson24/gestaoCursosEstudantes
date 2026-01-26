@@ -296,6 +296,7 @@ public class DashboardAdministradorController implements Initializable {
         }
     }
 
+
     /*-------------------------------------------
      * METODOS RESPONSAVEIS PELAS VAGAS - HOME
      * -------------------------------------------*/
