@@ -170,7 +170,7 @@ public class DashboardAdministradorController implements Initializable {
     private Circle imagemPerfil;
 
     /*-------------------------------------------
-    * METODOS RESPONSAVEIS PELA DASHBOARD - HOME
+    * 1 - METODOS RESPONSAVEIS PELA DASHBOARD - HOME
     * -------------------------------------------*/
 
     public void homeGraficoVagas(){
@@ -298,7 +298,7 @@ public class DashboardAdministradorController implements Initializable {
 
 
     /*-------------------------------------------
-     * METODOS RESPONSAVEIS PELAS VAGAS - HOME
+     * 2 - METODOS RESPONSAVEIS PELAS VAGAS
      * -------------------------------------------*/
 
     public void novaVaga(){
@@ -354,7 +354,7 @@ public class DashboardAdministradorController implements Initializable {
 
     public void eliminarVaga(){
 
-        if (variavelGuardaNumeroVagas > 0){
+        if (variavelGuardaNumeroInscritos > 0){
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("MENSAGEM DE ERRO");
             alert.setHeaderText(null);
@@ -531,6 +531,7 @@ public class DashboardAdministradorController implements Initializable {
 
     private int variavelGuardaIdVagas = 0;
     private int variavelGuardaNumeroVagas = 0;
+    private int variavelGuardaNumeroInscritos = 0;
     public void selecionarVaga(){
         Vaga vaga = vagas_tableView.getSelectionModel().getSelectedItem();
         int num = vagas_tableView.getSelectionModel().getSelectedIndex();
@@ -540,7 +541,8 @@ public class DashboardAdministradorController implements Initializable {
         }
         variavelGuardaIdVagas = vaga.getIdVaga();
         variavelGuardaNumeroVagas = vaga.getVagas();
-        //System.out.println(variavelGuardaIdVagas);
+        variavelGuardaNumeroInscritos = vaga.getInscritos();
+        System.out.println(variavelGuardaNumeroInscritos);
 
         vagas_vaga.setText(String.valueOf(vaga.getVagas()));
         vagas_area.setText(String.valueOf(vaga.getArea()));
@@ -636,7 +638,7 @@ public class DashboardAdministradorController implements Initializable {
     }
 
     /*-------------------------------------------
-     * METODOS RESPONSAVEIS PELAS INSCRIÇÕES - CANDIDATO
+     * 3 - METODOS RESPONSAVEIS PELAS INSCRIÇÕES - CANDIDATO
      * -------------------------------------------*/
 
     public void acharValorCurso(){
@@ -659,53 +661,86 @@ public class DashboardAdministradorController implements Initializable {
         }
     }
 
+
     public void cadastrarCandidato(){
-        String sql = "INSERT INTO candidatos (nome, idade, vaga, pagamento, data) VALUES (?, ?, ?, ?, ?)";
+        String consulta = "SELECT vagas FROM vagas WHERE area = ?";
+
+        int numVagas = 0;
 
         try (Connection connect = Conexao.obterConexao();
-             PreparedStatement prepare = connect.prepareStatement(sql)){
+             PreparedStatement prepare = connect.prepareStatement(consulta)){
 
-            Alert alert;
+            prepare.setString(1, inscricao_curso.getSelectionModel().getSelectedItem());
 
-            if (inscrica_nome.getText().isEmpty()
-                    ||  inscricao_idade.getText().isEmpty()
-                    ||  inscricao_labelValor.getText() == "0"
-                    ||  inscricao_curso.getSelectionModel() == null
+            ResultSet result = prepare.executeQuery();
 
-            ){
-                alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("MENSAGEM DE ERRO");
-                alert.setContentText("PREENCHA OS CAMPOS EM BRANCO");
-                alert.setHeaderText(null);
-                alert.showAndWait();
-            }else {
-                prepare.setString(1, inscrica_nome.getText().trim());
-                prepare.setString(2, inscricao_idade.getText().trim());
-                prepare.setString(3, inscricao_curso.getSelectionModel().getSelectedItem());
-                prepare.setString(4, inscricao_labelValor.getText().trim());
 
-                Date date = new Date();
-                java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-                prepare.setString(5, String.valueOf(sqlDate));
-
-                prepare.executeUpdate();
-
-                alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("MENSAGEM DE CONFIRMAÇÃO");
-                alert.setContentText("ESTUDANTE INSCRITO COM SUCESSO");
-                alert.setHeaderText(null);
-                alert.showAndWait();
-
-                maisUmCandidato(inscricao_curso.getSelectionModel().getSelectedItem());
-                System.out.println(inscricao_curso);
-
-                mostrarListaCandidatosListView();
-                configurarListView();
-                mostrarListaVagasListView();
-
+            if (result.next()) {
+                numVagas = result.getInt("vagas");
             }
+            //System.out.println("Antes do INSERT : " + numVagas);
+
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        if(numVagas <= 0){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("MENSAGEM DE ERRO");
+            alert.setContentText("NAO HA VAGAS DISPONIVEIS");
+            alert.setHeaderText(null);
+            alert.showAndWait();
+
+            limparCamposInscricao();
+
+        }else {
+            String sql = "INSERT INTO candidatos (nome, idade, vaga, pagamento, data) VALUES (?, ?, ?, ?, ?)";
+
+            try (Connection connect = Conexao.obterConexao();
+                 PreparedStatement prepare = connect.prepareStatement(sql)){
+
+                Alert alert;
+
+                if (inscrica_nome.getText().isEmpty()
+                        ||  inscricao_idade.getText().isEmpty()
+                        ||  inscricao_labelValor.getText() == "0"
+                        ||  inscricao_curso.getSelectionModel() == null
+
+                ){
+                    alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("MENSAGEM DE ERRO");
+                    alert.setContentText("PREENCHA OS CAMPOS EM BRANCO");
+                    alert.setHeaderText(null);
+                    alert.showAndWait();
+                }else {
+                    prepare.setString(1, inscrica_nome.getText().trim());
+                    prepare.setString(2, inscricao_idade.getText().trim());
+                    prepare.setString(3, inscricao_curso.getSelectionModel().getSelectedItem());
+                    prepare.setString(4, inscricao_labelValor.getText().trim());
+
+                    Date date = new Date();
+                    java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+                    prepare.setString(5, String.valueOf(sqlDate));
+
+                    prepare.executeUpdate();
+
+                    alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("MENSAGEM DE CONFIRMAÇÃO");
+                    alert.setContentText("ESTUDANTE INSCRITO COM SUCESSO");
+                    alert.setHeaderText(null);
+                    alert.showAndWait();
+
+                    maisUmCandidato(inscricao_curso.getSelectionModel().getSelectedItem());
+                    System.out.println(inscricao_curso);
+
+                    mostrarListaCandidatosListView();
+                    configurarListView();
+                    mostrarListaVagasListView();
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

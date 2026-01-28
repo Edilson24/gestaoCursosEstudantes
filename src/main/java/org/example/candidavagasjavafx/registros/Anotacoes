@@ -1,6 +1,6 @@
 Ajustes e Problemas a serem resolvidos{
     1. Ao tentar eliminar um curso tem de se verificar se tem algum candidato inscrito ou não. Se sim, o curso não poderá ser eliminado.
-    2. Impedir a inscrição de mais candidatos em cursos com vagas esgotadas.
+    2✅. Impedir a inscrição de mais candidatos em cursos com vagas esgotadas.
 }
 
 REFAZER A TABELA DE VAGAS{

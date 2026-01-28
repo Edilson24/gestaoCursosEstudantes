@@ -104,7 +104,7 @@
                <center>
                   <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                      <children>
-                        <AnchorPane fx:id="home_form" layoutX="7.0" layoutY="6.0" prefHeight="649.0" prefWidth="1084.0" stylesheets="@../css/DashboardStyle.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane fx:id="home_form" layoutX="7.0" layoutY="6.0" prefHeight="649.0" prefWidth="1084.0" stylesheets="@../css/DashboardStyle.css" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <AnchorPane layoutX="352.0" layoutY="325.0" prefHeight="363.0" prefWidth="390.0" stylesheets="@../css/DashboardStyle.css" AnchorPane.bottomAnchor="9.0" AnchorPane.leftAnchor="352.0" AnchorPane.rightAnchor="340.0">
                                  <styleClass>
@@ -230,7 +230,7 @@
                               </AnchorPane>
                            </children>
                         </AnchorPane>
-                        <AnchorPane fx:id="vagas_form" prefHeight="649.0" prefWidth="1084.0" visible="false">
+                        <AnchorPane fx:id="vagas_form" prefHeight="649.0" prefWidth="1084.0">
                            <children>
                               <AnchorPane layoutX="384.0" layoutY="5.0" prefHeight="641.0" prefWidth="695.0" stylesheets="@../css/DashboardStyle.css">
                                  <styleClass>
