@@ -16,7 +16,7 @@ public class JasperReportController {
 
         try {
             InputStream jrxml = getClass()
-                    .getResourceAsStream("/org/example/candidavagasjavafx/reports/Anuncio.jrxml");
+                    .getResourceAsStream("/org/example/candidavagasjavafx/reports/relat.jrxml");
 
             InputStream background = getClass()
                     .getResourceAsStream("/org/example/candidavagasjavafx/imagem/lifterbackgroundjasper.png");

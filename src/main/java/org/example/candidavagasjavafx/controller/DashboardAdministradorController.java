@@ -352,6 +352,7 @@ public class DashboardAdministradorController implements Initializable {
         limparCampos();
     }
 
+    @FXML
     public void eliminarVaga(){
 
         if (variavelGuardaNumeroInscritos > 0){
