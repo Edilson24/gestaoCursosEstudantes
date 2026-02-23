@@ -543,7 +543,7 @@ public class DashboardAdministradorController implements Initializable {
         variavelGuardaIdVagas = vaga.getIdVaga();
         variavelGuardaNumeroVagas = vaga.getVagas();
         variavelGuardaNumeroInscritos = vaga.getInscritos();
-        System.out.println(variavelGuardaNumeroInscritos);
+        System.out.println(variavelGuardaIdVagas);
 
         vagas_vaga.setText(String.valueOf(vaga.getVagas()));
         vagas_area.setText(String.valueOf(vaga.getArea()));
@@ -755,7 +755,7 @@ public class DashboardAdministradorController implements Initializable {
 
         try (Connection connect = Conexao.obterConexao()) {
 
-            // 1️⃣ Buscar dados atuais
+            // Buscar dados atuais
             try (PreparedStatement psSelect = connect.prepareStatement(selectSQL)) {
                 psSelect.setString(1, MaisCurso);
 
@@ -781,7 +781,7 @@ public class DashboardAdministradorController implements Initializable {
                 return;
             }
 
-            // 2️⃣ Atualizar dados
+            // Atualizar dados
             try (PreparedStatement psUpdate = connect.prepareStatement(updateSQL)) {
                 psUpdate.setInt(1, vagasDisponiveis - 1);
                 psUpdate.setInt(2, candidatosInscritos + 1);
@@ -846,7 +846,7 @@ public class DashboardAdministradorController implements Initializable {
 
         try (Connection connect = Conexao.obterConexao()) {
 
-            // 1️⃣ Buscar dados atuais
+            //  Buscar dados atuais
             try (PreparedStatement psSelect = connect.prepareStatement(selectSQL)) {
                 psSelect.setString(1, MenosCurso);
 
@@ -861,13 +861,13 @@ public class DashboardAdministradorController implements Initializable {
                 }
             }
 
-            // 2️⃣ Validações básicas
+            // Validações básicas
             if (candidatosInscritos <= 0) {
                 System.out.println("Não há candidatos para eliminar!");
                 return;
             }
 
-            // 3️⃣ Atualizar dados (lógica inversa)
+            // Atualizar dados (lógica inversa)
             try (PreparedStatement psUpdate = connect.prepareStatement(updateSQL)) {
                 psUpdate.setInt(1, vagasDisponiveis + 1);
                 psUpdate.setInt(2, candidatosInscritos - 1);

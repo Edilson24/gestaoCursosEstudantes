@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.21.3-4a3078d20785ebe464f18037d738d12fc98c13cf  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="relat" pageWidth="478" pageHeight="842" columnWidth="478" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="c62b77dc-be9c-4938-8295-290227fc0d6e">
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="curso" class="java.lang.String"/>
+	<parameter name="vaga" class="java.lang.Integer"/>
+	<parameter name="valor" class="java.lang.Float"/>
+	<parameter name="dataAbertura" class="java.util.Date"/>
+	<parameter name="dataEncerramento" class="java.util.Date"/>
+	<parameter name="backImage" class="java.lang.Object"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<detail>
+		<band height="842" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+
+            <image>
+                <reportElement x="0" y="0" width="480" height="842" uuid="74495ba0-9404-4b4c-875c-1c8b21f6d3d9">
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <imageExpression><![CDATA[$P{backImage}]]></imageExpression>
+            </image>
+
+			<staticText>
+				<reportElement x="144" y="140" width="189" height="23" forecolor="#FFFFFF" backcolor="#FFFFFF" uuid="e8512d4a-1936-4bfe-a472-3c383ab6e24e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ANÚNCIO DE VAGAS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="340" y="720" width="110" height="20" forecolor="#FFFFFF" uuid="77ab47f9-2b06-4e24-a578-1bbc88f38ff0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Edilson Vitorino Hilário]]></text>
+			</staticText>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement x="30" y="210" width="410" height="248" forecolor="#000000" uuid="d72a7af8-5bf2-4fc1-817d-81ccb310215a"/>
+                <textElement>
+                    <font size="13"/>
+                </textElement>
+                    <textFieldExpression>
+                        <![CDATA[
+                        "OPORTUNIDADE IMPERDÍVEL!\n\n" +
+                        "Está aberta uma nova vaga na área de " + ($P{curso} == null ? "" : $P{curso}) + "!\n" +
+                        "Número de vagas disponíveis: " + ($P{vaga} == null ? "" : $P{vaga}.toString()) + "\n" +
+                        "Valor oferecido: " + ($P{valor} == null ? "" : $P{valor}.toString()) + "\n" +
+                        "Período de candidatura: de " + ($P{dataAbertura} == null ? "" : $P{dataAbertura}.toString()) +
+                        " até " + ($P{dataEncerramento} == null ? "" : $P{dataEncerramento}.toString()) + "\n\n" +
+                        "Se você busca uma oportunidade para desenvolver suas competências e fazer parte de um ambiente profissional dinâmico, esta vaga é para você!\n\n" +
+                        "Não perca tempo — candidate-se agora!"
+                        ]]>
+                    </textFieldExpression>
+            </textField>
+
+
+		</band>
+	</detail>
+</jasperReport>
