@@ -176,7 +176,116 @@ public class DashboardFuncionarioController implements Initializable {
     @FXML
     private Circle imagemPerfil;
 
+    /*-------------------------------------------
+     * 1 - METODOS RESPONSAVEIS PELA DASHBOARD - HOME
+     * -------------------------------------------*/
 
+    public void homeGraficoVagas(){
+        home_graficoVagas.getData().clear();
+
+        String sql = "SELECT data, COUNT(idvagas) FROM vagas GROUP BY data ORDER BY TIMESTAMP(data) ASC LIMIT 7";
+
+
+        try (Connection connect = Conexao.obterConexao();
+             PreparedStatement prepare = connect.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery())
+        {
+
+            XYChart.Series grafico = new XYChart.Series();
+
+
+
+            while (result.next()){
+                grafico.getData().add(new XYChart.Data(result.getString(1), result.getInt(2)));
+            }
+
+            home_graficoVagas.getData().add(grafico);
+
+        } catch (Exception e) {e.printStackTrace();}
+    }
+
+    public void homeGrafico(){
+        home_graficoCandidato.getData().clear();
+
+        String sql = "SELECT data, COUNT(idcandidato) FROM candidatos GROUP BY data ORDER BY TIMESTAMP(data) ASC LIMIT 7";
+
+        try (Connection connect = Conexao.obterConexao();
+             PreparedStatement prepare = connect.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery();)
+        {
+            XYChart.Series grafico = new XYChart.Series();
+
+            while (result.next()){
+                grafico.getData().add(new XYChart.Data(result.getString(1), result.getInt(2)));
+            }
+
+            home_graficoCandidato.getData().add(grafico);
+
+        } catch (Exception e) {e.printStackTrace();}
+    }
+
+    public void somaCandidatos(){
+        String sql = "SELECT * FROM candidatos";
+
+        try (Connection connct = Conexao.obterConexao();
+             PreparedStatement prepare = connct.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery()) {
+
+            int acomulador = 0;
+            while (result.next()){
+                String repetidor = result.getString("nome");
+                acomulador += 1;
+            }
+
+            home_totalCandidatos.setText(String.valueOf(acomulador));
+            System.out.println();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void somaVagas(){
+        String sql = "SELECT vagas FROM vagas";
+
+        try (Connection connct = Conexao.obterConexao();
+             PreparedStatement prepare = connct.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery()) {
+
+            int acomulador = 0;
+            while (result.next()){
+                int repetidor = result.getInt("vagas");
+                acomulador += repetidor;
+            }
+
+            home_totalVagas.setText(String.valueOf(acomulador));
+            System.out.println();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void somaCursos(){
+        String sql = "SELECT COUNT(idvagas) FROM vagas";
+
+        int contagemDados = 0;
+
+        try (Connection connect = Conexao.obterConexao();
+             PreparedStatement prepare = connect.prepareStatement(sql);
+             ResultSet result = prepare.executeQuery();) {
+
+            while (result.next()){
+                contagemDados = result.getInt("COUNT(idvagas)");
+            }
+            home_totalCursos.setText(String.valueOf(contagemDados));
+        } catch (Exception e) {e.printStackTrace();}
+
+    }
+
+    /*-------------------------------------------
+     * 3 - METODOS RESPONSAVEIS PELAS INSCRIÇÕES - CANDIDATO
+     * -------------------------------------------*/
 
     public void cadastrarCandidato(){
         String sql = "INSERT INTO candidatos (nome, idade, vaga, pagamento, data) VALUES (?, ?, ?, ?, ?)";
@@ -298,71 +407,6 @@ public class DashboardFuncionarioController implements Initializable {
         }
     }
 
-    public void homeGraficoVagas(){
-        home_graficoVagas.getData().clear();
-
-        String sql = "SELECT data, COUNT(idvagas) FROM vagas GROUP BY data ORDER BY TIMESTAMP(data) ASC LIMIT 7";
-
-
-        try (Connection connect = Conexao.obterConexao();
-             PreparedStatement prepare = connect.prepareStatement(sql);
-             ResultSet result = prepare.executeQuery())
-        {
-
-            XYChart.Series grafico = new XYChart.Series();
-
-
-
-            while (result.next()){
-                grafico.getData().add(new XYChart.Data(result.getString(1), result.getInt(2)));
-            }
-
-            home_graficoVagas.getData().add(grafico);
-
-        } catch (Exception e) {e.printStackTrace();}
-    }
-
-    public void homeGrafico(){
-        home_graficoCandidato.getData().clear();
-
-        String sql = "SELECT data, COUNT(idcandidato) FROM candidatos GROUP BY data ORDER BY TIMESTAMP(data) ASC LIMIT 7";
-
-        try (Connection connect = Conexao.obterConexao();
-             PreparedStatement prepare = connect.prepareStatement(sql);
-             ResultSet result = prepare.executeQuery();)
-        {
-            XYChart.Series grafico = new XYChart.Series();
-
-            while (result.next()){
-                grafico.getData().add(new XYChart.Data(result.getString(1), result.getInt(2)));
-            }
-
-            home_graficoCandidato.getData().add(grafico);
-
-        } catch (Exception e) {e.printStackTrace();}
-    }
-
-    public void somaCandidatos(){
-        String sql = "SELECT * FROM candidatos";
-
-        try (Connection connct = Conexao.obterConexao();
-             PreparedStatement prepare = connct.prepareStatement(sql);
-             ResultSet result = prepare.executeQuery()) {
-
-            int acomulador = 0;
-            while (result.next()){
-                String repetidor = result.getString("nome");
-                acomulador += 1;
-            }
-
-            home_totalCandidatos.setText(String.valueOf(acomulador));
-            System.out.println();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void inscricaoGetCursoDisponivel(){
         String sql = "SELECT * FROM vagas WHERE vagas > inscritos";
 
@@ -382,29 +426,6 @@ public class DashboardFuncionarioController implements Initializable {
             e.printStackTrace();
         }
     }
-
-    public void somaVagas(){
-        String sql = "SELECT vagas FROM vagas";
-
-        try (Connection connct = Conexao.obterConexao();
-             PreparedStatement prepare = connct.prepareStatement(sql);
-             ResultSet result = prepare.executeQuery()) {
-
-            int acomulador = 0;
-            while (result.next()){
-                int repetidor = result.getInt("vagas");
-                acomulador += repetidor;
-            }
-
-            home_totalVagas.setText(String.valueOf(acomulador));
-            System.out.println();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
 
     public void configurarListViewCurso(){
         inscricaoList.setCellFactory(list -> new ListCell<>() {
@@ -449,7 +470,6 @@ public class DashboardFuncionarioController implements Initializable {
         });
     }
 
-
     public void configurarListView() {
 
         home_vagasList.setCellFactory(list -> new ListCell<>() {
@@ -493,8 +513,6 @@ public class DashboardFuncionarioController implements Initializable {
             }
         });
     }
-
-
 
     public ObservableList<Vaga> ListaVagasDisponiveis(){
         ObservableList <Vaga> listaVagas = FXCollections.observableArrayList();
@@ -610,23 +628,6 @@ public class DashboardFuncionarioController implements Initializable {
 
     public void mostrarListaCandidatosListView() {
         candidato_ListView.setItems(BuscaListaCandidatos());
-    }
-
-    public void somaCursos(){
-        String sql = "SELECT COUNT(idvagas) FROM vagas";
-
-        int contagemDados = 0;
-
-        try (Connection connect = Conexao.obterConexao();
-             PreparedStatement prepare = connect.prepareStatement(sql);
-             ResultSet result = prepare.executeQuery();) {
-
-            while (result.next()){
-                contagemDados = result.getInt("COUNT(idvagas)");
-            }
-            home_totalCursos.setText(String.valueOf(contagemDados));
-        } catch (Exception e) {e.printStackTrace();}
-
     }
 
     int variavelGuardaIdCandidatos = 0;

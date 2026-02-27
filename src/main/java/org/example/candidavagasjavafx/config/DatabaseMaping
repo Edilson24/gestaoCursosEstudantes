@@ -1,0 +1,39 @@
+Código SQL para criação de banco de dados para essa aplicação.
+1. Tabela "candidatos":
+
+CREATE TABLE `candidatos` (
+  `idcandidato` int NOT NULL AUTO_INCREMENT,
+  `nome` varchar(45) DEFAULT NULL,
+  `idade` int DEFAULT NULL,
+  `vaga` varchar(45) DEFAULT NULL,
+  `pagamento` float DEFAULT NULL,
+  `data` date DEFAULT NULL,
+  PRIMARY KEY (`idcandidato`)
+)
+
+-------------------------------
+2. Tabela "usuario":
+
+CREATE TABLE `usuario` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nome` varchar(100) DEFAULT NULL,
+  `senha` varchar(50) DEFAULT NULL,
+  `prioridade` varchar(20) DEFAULT NULL,
+  `imagem` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)
+
+-------------------------------
+3. Tabela "vagas":
+
+CREATE TABLE `vagas` (
+  `idvagas` int NOT NULL AUTO_INCREMENT,
+  `area` varchar(100) DEFAULT NULL,
+  `vagas` varchar(100) DEFAULT NULL,
+  `inscritos` int DEFAULT NULL,
+  `abertura` date DEFAULT NULL,
+  `encerramento` date DEFAULT NULL,
+  `valor` double DEFAULT NULL,
+  `data` date DEFAULT NULL,
+  PRIMARY KEY (`idvagas`)
+)
